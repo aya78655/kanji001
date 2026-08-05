@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漢字クイズ 〜5年夏 国語 第1〜6回〜</title>
+<style>
+  :root{
+    --bg:#f5f3ee;
+    --card:#ffffff;
+    --ink:#2c2a26;
+    --accent:#b5471b;
+    --accent2:#2f6b4f;
+    --muted:#8a8478;
+    --border:#e3ded3;
+    --wrong:#c0392b;
+    --correct:#2f6b4f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Hiragino Mincho ProN","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:24px 16px 60px;
+  }
+  .wrap{
+    width:100%;
+    max-width:640px;
+  }
+  h1{
+    font-size:1.4rem;
+    text-align:center;
+    margin:0 0 4px;
+    letter-spacing:.02em;
+  }
+  .sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:.85rem;
+    margin-bottom:24px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:24px 20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.04);
+    margin-bottom:16px;
+  }
+  .section-title{
+    font-weight:700;
+    font-size:1rem;
+    margin:0 0 12px;
+    color:var(--accent);
+  }
+  .options label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 4px;
+    border-bottom:1px solid var(--border);
+    font-size:.95rem;
+    cursor:pointer;
+  }
+  .options label:last-child{border-bottom:none;}
+  .options input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);}
+  .count-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:16px;
+    font-size:.9rem;
+  }
+  select, button{
+    font-family:inherit;
+    font-size:.95rem;
+  }
+  select{
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:#fff;
+  }
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    font-size:.9rem;
+    color:var(--muted);
+  }
+  button{
+    border:none;
+    border-radius:10px;
+    padding:14px 18px;
+    cursor:pointer;
+    font-weight:700;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  button:active{transform:scale(.98);}
+  .btn-primary{
+    background:var(--accent);
+    color:#fff;
+    width:100%;
+    font-size:1.05rem;
+    margin-top:20px;
+  }
+  .btn-secondary{
+    background:#eee7d9;
+    color:var(--ink);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--accent);
+    border:1px solid var(--accent);
+  }
+  #startScreen .warn{
+    color:var(--muted);
+    font-size:.8rem;
+    margin-top:10px;
+    text-align:center;
+  }
+  .hidden{display:none !important;}
+
+  /* Quiz screen */
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:.85rem;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .progress-bar{
+    flex:1;
+    height:6px;
+    background:var(--border);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--accent);
+    width:0%;
+    transition:width .25s ease;
+  }
+  .badge{
+    display:inline-block;
+    font-size:.72rem;
+    color:var(--accent2);
+    background:#e7f0ea;
+    border-radius:99px;
+    padding:2px 10px;
+    margin-bottom:14px;
+  }
+  .sentence{
+    font-size:1.25rem;
+    line-height:2.1;
+    margin:6px 0 22px;
+    word-break:keep-all;
+  }
+  .blank{
+    display:inline-block;
+    min-width:2.6em;
+    border-bottom:2px solid var(--accent);
+    color:var(--accent);
+    font-weight:700;
+    text-align:center;
+    padding:0 4px;
+  }
+  .hint{
+    font-size:.8rem;
+    color:var(--muted);
+    margin:-14px 0 18px;
+  }
+  input#answerInput{
+    width:100%;
+    font-size:1.15rem;
+    padding:12px 14px;
+    border:2px solid var(--border);
+    border-radius:10px;
+    outline:none;
+    text-align:center;
+  }
+  input#answerInput:focus{border-color:var(--accent);}
+  .result-box{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:.95rem;
+    display:none;
+  }
+  .result-box.correct{
+    background:#e7f3ec;
+    color:var(--correct);
+    display:block;
+  }
+  .result-box.wrong{
+    background:#fbebe8;
+    color:var(--wrong);
+    display:block;
+  }
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .actions button{flex:1;}
+
+  /* Result screen */
+  .score-big{
+    text-align:center;
+    font-size:2.4rem;
+    font-weight:800;
+    color:var(--accent);
+    margin:6px 0 2px;
+  }
+  .score-sub{
+    text-align:center;
+    color:var(--muted);
+    margin-bottom:20px;
+    font-size:.9rem;
+  }
+  .review-item{
+    padding:10px 0;
+    border-bottom:1px solid var(--border);
+    font-size:.92rem;
+  }
+  .review-item:last-child{border-bottom:none;}
+  .review-item .rs{color:var(--muted);font-size:.85rem;}
+  .review-item .ra{color:var(--correct);font-weight:700;}
+  .review-item .ru{color:var(--wrong);text-decoration:line-through;margin-right:6px;}
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:.75rem;
+    margin-top:30px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>漢字クイズ</h1>
+  <div class="sub">5年夏 国語 第1〜6回（1〜3年生で学習した漢字・まちがいやすい送りがな）全140問</div>
+
+  <!-- START SCREEN -->
+  <div id="startScreen" class="card">
+    <p class="section-title">出題範囲を選ぶ</p>
+    <div class="options">
+      <label><input type="checkbox" class="rangeChk" value="第1・2回" checked> 第1・2回 1〜3年生で学習した漢字①（40問）</label>
+      <label><input type="checkbox" class="rangeChk" value="第3・4回" checked> 第3・4回 1〜3年生で学習した漢字②（40問）</label>
+      <label><input type="checkbox" class="rangeChk" value="第5・6回" checked> 第5・6回 まちがいやすい送りがな（60問）</label>
+    </div>
+
+    <div class="count-row">
+      <span>出題数</span>
+      <select id="countSelect">
+        <option value="all">選んだ範囲を全て</option>
+        <option value="10">10問</option>
+        <option value="20">20問</option>
+        <option value="40">40問</option>
+      </select>
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="shuffleChk" checked>
+      <label for="shuffleChk">問題の順番をシャッフルする</label>
+    </div>
+
+    <button class="btn-primary" id="startBtn">クイズを始める</button>
+    <p class="warn">カタカナの部分を漢字に直して入力してください（送りがなが必要なものは送りがなも含めて解答します）。</p>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="card hidden">
+    <div class="badge" id="qBadge"></div>
+    <div class="progress-wrap">
+      <span id="qCounter">1 / 10</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <span id="qScore">正解 0</span>
+    </div>
+    <div class="sentence" id="qSentence"></div>
+    <input type="text" id="answerInput" placeholder="漢字で入力" autocomplete="off">
+    <div class="result-box" id="resultBox"></div>
+    <div class="actions">
+      <button class="btn-secondary" id="skipBtn">わからない</button>
+      <button class="btn-primary" id="submitBtn" style="margin-top:0;">答える</button>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="resultScreen" class="card hidden">
+    <p class="section-title">結果</p>
+    <div class="score-big" id="finalScore">0 / 0</div>
+    <div class="score-sub" id="finalPct"></div>
+    <div id="reviewList"></div>
+    <div class="actions">
+      <button class="btn-ghost" id="retryWrongBtn">間違えた問題だけ復習する</button>
+      <button class="btn-primary" id="restartBtn" style="margin-top:0;">最初からやり直す</button>
+    </div>
+  </div>
+
+  <footer>5年夏 国語（必修編 第1・2回〜第5・6回）より作成</footer>
+</div>
+
+<script>
+// ---------------------------------------------------------------
+// 問題データ（全140問）
+// key: 文中でカタカナのまま出てくる箇所（空欄化する対象）
+// answer: 正解の漢字（送りがなを含む場合あり）
+// alts: 別解（あれば）
+// ---------------------------------------------------------------
+const QUESTIONS = [
+// ===== 第1・2回 =====
+{r:"第1・2回",no:1,s:"劇の演目は決まったので、配役などのイサイは今後の会議で検討する。",k:"イサイ",a:"委細"},
+{r:"第1・2回",no:2,s:"これまでの貯金をくずして、子どもの学費をクメンする。",k:"クメン",a:"工面"},
+{r:"第1・2回",no:3,s:"アジア各国を訪れ、現地の文化に対するチケンを広める。",k:"チケン",a:"知見"},
+{r:"第1・2回",no:4,s:"家族の誰もが、皿を割ったのは弟のシワザだろうと思っている。",k:"シワザ",a:"仕業"},
+{r:"第1・2回",no:5,s:"翌日提出の宿題があることを思い出し、セッパ詰まって部活を休んだ。",k:"セッパ",a:"切羽"},
+{r:"第1・2回",no:6,s:"彼はガンライ面倒見の良い人なので、手伝ってくれたことは不思議ではない。",k:"ガンライ",a:"元来"},
+{r:"第1・2回",no:7,s:"客船はキテキを鳴らしながら港に近づいた。",k:"キテキ",a:"汽笛"},
+{r:"第1・2回",no:8,s:"緊張すると、ヘイゼイの彼女からは考えられないほど声が小さくなる。",k:"ヘイゼイ",a:"平静"},
+{r:"第1・2回",no:9,s:"古代ギリシャの哲学者タレスは「バンブツの根源は水である」と説いた。",k:"バンブツ",a:"万物"},
+{r:"第1・2回",no:10,s:"内容も見ずに手紙を捨てたのはソウケイだったと反省している。",k:"ソウケイ",a:"早計"},
+{r:"第1・2回",no:11,s:"家を出た途端に雨に降られ、デバナをくじかれた気分だ。",k:"デバナ",a:"出鼻"},
+{r:"第1・2回",no:12,s:"彼女からガテンのいく説明を聞くまでは帰れない。",k:"ガテン",a:"合点"},
+{r:"第1・2回",no:13,s:"何気なく触れた陶器は百万円もするシロモノだった。",k:"シロモノ",a:"代物"},
+{r:"第1・2回",no:14,s:"彼の発明は、科学の常識を変えるカッキ的なものだった。",k:"カッキ",a:"画期"},
+{r:"第1・2回",no:15,s:"彼女はとても上手にシャミセンを弾く。",k:"シャミセン",a:"三味線"},
+{r:"第1・2回",no:16,s:"彼らはバンドを結成してすぐにトウカクを現し、一躍有名人になった。",k:"トウカク",a:"頭角"},
+{r:"第1・2回",no:17,s:"恐ろしい光景を見て、全身にオカンが走った。",k:"オカン",a:"悪寒"},
+{r:"第1・2回",no:18,s:"強盗団は、ハクチュウ堂々と宝石店に侵入した。",k:"ハクチュウ",a:"白昼"},
+{r:"第1・2回",no:19,s:"自衛隊は、戦後にホッソクした組織である。",k:"ホッソク",a:"発足"},
+{r:"第1・2回",no:20,s:"ナポレオンがタイトウするまでの歴史を学ぶ。",k:"タイトウ",a:"台頭"},
+{r:"第1・2回",no:21,s:"彼のフウテイから、科学者なのだろうと推測する。",k:"フウテイ",a:"風体"},
+{r:"第1・2回",no:22,s:"体に異変がある場合には、フクヤクをやめるよう医師に言われた。",k:"フクヤク",a:"服薬"},
+{r:"第1・2回",no:23,s:"二十年ぶりに故郷へ帰ると、セキジツの面影はなかった。",k:"セキジツ",a:"昔日"},
+{r:"第1・2回",no:24,s:"作品が完成した生徒から、サミダレ式に提出した。",k:"サミダレ",a:"五月雨"},
+{r:"第1・2回",no:25,s:"宝くじに当選した人は、ノホウズにお金を使っている。",k:"ノホウズ",a:"野放図"},
+{r:"第1・2回",no:26,s:"深夜の公園はキミが悪く、思わず目を背けた。",k:"キミ",a:"気味"},
+{r:"第1・2回",no:27,s:"ホームランを打った彼は、チームのタテヤクシャとなった。",k:"タテヤクシャ",a:"立役者"},
+{r:"第1・2回",no:28,s:"彼は昔からイジワルな性格で、周りを困らせていた。",k:"イジワル",a:"意地悪"},
+{r:"第1・2回",no:29,s:"旅行の行き先が決まったので、サッソク荷物を準備しよう。",k:"サッソク",a:"早速"},
+{r:"第1・2回",no:30,s:"海外に移住する友人を、コンジョウの別れのように見送った。",k:"コンジョウ",a:"今生"},
+{r:"第1・2回",no:31,s:"卒業生のカドデを祝うために歌をうたう。",k:"カドデ",a:"門出"},
+{r:"第1・2回",no:32,s:"サクランボはメカタで売られる。",k:"メカタ",a:"目方"},
+{r:"第1・2回",no:33,s:"女王の姿からは、ケダカサや美しさを感じられる。",k:"ケダカサ",a:"気高さ"},
+{r:"第1・2回",no:34,s:"手紙の返事が来るのを、一日センシュウの思いで待っている。",k:"センシュウ",a:"千秋"},
+{r:"第1・2回",no:35,s:"かつては、シュツジによって身分を決められていた。",k:"シュツジ",a:"出自"},
+{r:"第1・2回",no:36,s:"反対の声もあったが、彼はゴウインに計画を進めた。",k:"ゴウイン",a:"強引"},
+{r:"第1・2回",no:37,s:"学校では騒がしい彼も、外ではセケンテイを気にしておとなしくなる。",k:"セケンテイ",a:"世間体"},
+{r:"第1・2回",no:38,s:"疲れを癒やすため、温泉に入った。彼はメイトウと言われる。",k:"メイトウ",a:"名湯"},
+{r:"第1・2回",no:39,s:"彼女はマジメな性格なので、周囲からの信頼も厚い。",k:"マジメ",a:"真面目"},
+{r:"第1・2回",no:40,s:"寄せ木ザイクは、手先が器用でないと作ることができない。",k:"ザイク",a:"細工"},
+
+// ===== 第3・4回 =====
+{r:"第3・4回",no:1,s:"彼に悩みを相談したことで、アンウンがはれたように気が楽になった。",k:"アンウン",a:"暗雲"},
+{r:"第3・4回",no:2,s:"電源がつかないだけで故障したと思うのは、アンチョクな発想だ。",k:"アンチョク",a:"安直"},
+{r:"第3・4回",no:3,s:"母は、話す相手によってコワイロが変わる。",k:"コワイロ",a:"声色"},
+{r:"第3・4回",no:4,s:"店員がとても丁寧なクチョウで話しかける。",k:"クチョウ",a:"口調"},
+{r:"第3・4回",no:5,s:"このペンは使いガッテがいいので、長年愛用している。",k:"ガッテ",a:"勝手"},
+{r:"第3・4回",no:6,s:"外に出たら、そのツド手を洗うべきだ。",k:"ツド",a:"都度"},
+{r:"第3・4回",no:7,s:"この映画には、製作された頃のジセイが反映されている。",k:"ジセイ",a:"時世"},
+{r:"第3・4回",no:8,s:"亡くなった恩師のおツヤに参列する。",k:"ツヤ",a:"通夜"},
+{r:"第3・4回",no:9,s:"この活火山は、頻繁にメイドウをくり返す。",k:"メイドウ",a:"鳴動"},
+{r:"第3・4回",no:10,s:"オセロでは、角をとるのがジョウセキだ。",k:"ジョウセキ",a:"定石"},
+{r:"第3・4回",no:11,s:"警察官が、事故の原因をキュウメイする。",k:"キュウメイ",a:"究明"},
+{r:"第3・4回",no:12,s:"誰かが背後から近づくケハイを感じ、振り返った。",k:"ケハイ",a:"気配"},
+{r:"第3・4回",no:13,s:"引っ越しの際に、家具をシンチョウする。",k:"シンチョウ",a:"新調"},
+{r:"第3・4回",no:14,s:"大会で優勝した彼らは、カイシンの笑みをうかべた。",k:"カイシン",a:"会心"},
+{r:"第3・4回",no:15,s:"一日の授業が終わると、彼女はすぐにキロについた。",k:"キロ",a:"帰路"},
+{r:"第3・4回",no:16,s:"彼に関する悪いフウブンが、真実か確かめる。",k:"フウブン",a:"風聞"},
+{r:"第3・4回",no:17,s:"都でミヤヅカエをする武士。",k:"ミヤヅカエ",a:"宮仕え"},
+{r:"第3・4回",no:18,s:"彼のオンドでクラスの全員が一斉に走り出した。",k:"オンド",a:"音頭"},
+{r:"第3・4回",no:19,s:"この会社のメイウンは、社長である彼にかかっている。",k:"メイウン",a:"命運"},
+{r:"第3・4回",no:20,s:"激怒した彼は、鬼のようなギョウソウでこちらを見ている。",k:"ギョウソウ",a:"形相"},
+{r:"第3・4回",no:21,s:"芸能人のジキヒツのサインを手に入れる。",k:"ジキヒツ",a:"直筆"},
+{r:"第3・4回",no:22,s:"駅に到着すると、うまいグアイに電車がきた。",k:"グアイ",a:"具合"},
+{r:"第3・4回",no:23,s:"ミスをした選手に向かって、会場からヤジが飛ばされた。",k:"ヤジ",a:"野次"},
+{r:"第3・4回",no:24,s:"逃げた猫を見ていないか、手当たりシダイに聞いて回った。",k:"シダイ",a:"次第"},
+{r:"第3・4回",no:25,s:"有名人同士の結婚は、世間のジモクを集めた。",k:"ジモク",a:"耳目"},
+{r:"第3・4回",no:26,s:"上司からの誘いをテイチョウに断る。",k:"テイチョウ",a:"丁重"},
+{r:"第3・4回",no:27,s:"彼らのチームと協力することで、ソウジョウ効果を得られるだろう。",k:"ソウジョウ",a:"相乗"},
+{r:"第3・4回",no:28,s:"いなくなった犬のユクエを追って、町中をかけまわる。",k:"ユクエ",a:"行方"},
+{r:"第3・4回",no:29,s:"彼女は女優から歌手にテンコウした。",k:"テンコウ",a:"転向"},
+{r:"第3・4回",no:30,s:"悲観的な発言は、不安をジョチョウするだけだ。",k:"ジョチョウ",a:"助長"},
+{r:"第3・4回",no:31,s:"先生はシンミになって私の相談にのってくれた。",k:"シンミ",a:"親身"},
+{r:"第3・4回",no:32,s:"一流レストランで働く彼女は、一つ一つのショサがとても上品だ。",k:"ショサ",a:"所作"},
+{r:"第3・4回",no:33,s:"戦いのヨウソウを事細かに記述した歴史書を読む。",k:"ヨウソウ",a:"様相"},
+{r:"第3・4回",no:34,s:"今日は晴れているので、絶好の花見ビヨリだ。",k:"ビヨリ",a:"日和"},
+{r:"第3・4回",no:35,s:"令和という元号は、万葉集の一節にユライしている。",k:"ユライ",a:"由来"},
+{r:"第3・4回",no:36,s:"精密な機械を扱うときは、サイシンの注意を払う。",k:"サイシン",a:"細心"},
+{r:"第3・4回",no:37,s:"彼のサシズを受けて行動するのはいやだ。",k:"サシズ",a:"指図"},
+{r:"第3・4回",no:38,s:"書く物がないので、電話番号をコウトウで伝える。",k:"コウトウ",a:"口頭"},
+{r:"第3・4回",no:39,s:"この薬は、一日三回フクヨウするように言われている。",k:"フクヨウ",a:"服用"},
+{r:"第3・4回",no:40,s:"ヨーロッパでケンブンしたことを、日本で発表する。",k:"ケンブン",a:"見聞"},
+
+// ===== 第5・6回（まちがいやすい送りがな） =====
+{r:"第5・6回",no:1,s:"川を舟でクダル。",k:"クダル",a:"下る"},
+{r:"第5・6回",no:2,s:"都にノボル。",k:"ノボル",a:"上る",alts:["登る"]},
+{r:"第5・6回",no:3,s:"長男がウマレル。",k:"ウマレル",a:"生まれる"},
+{r:"第5・6回",no:4,s:"人数がタリル。",k:"タリル",a:"足りる"},
+{r:"第5・6回",no:5,s:"コダチに囲まれた家。",k:"コダチ",a:"木立"},
+{r:"第5・6回",no:6,s:"タチバナシで済ます。",k:"タチバナシ",a:"立ち話"},
+{r:"第5・6回",no:7,s:"通行にオクレル。",k:"オクレル",a:"遅れる"},
+{r:"第5・6回",no:8,s:"道がマジワル。",k:"マジワル",a:"交わる"},
+{r:"第5・6回",no:9,s:"飯に砂粒がマジル。",k:"マジル",a:"混じる"},
+{r:"第5・6回",no:10,s:"車がオオヤケになる。",k:"オオヤケ",a:"公"},
+{r:"第5・6回",no:11,s:"ミズカラ告白する。",k:"ミズカラ",a:"自ら"},
+{r:"第5・6回",no:12,s:"スクナイ人数だ。",k:"スクナイ",a:"少ない"},
+{r:"第5・6回",no:13,s:"アラタニ作る。",k:"アラタニ",a:"新たに"},
+{r:"第5・6回",no:14,s:"クミアイに加入する。",k:"クミアイ",a:"組合"},
+{r:"第5・6回",no:15,s:"タダチニ出発する。",k:"タダチニ",a:"直ちに"},
+{r:"第5・6回",no:16,s:"志ナカバで倒れる。",k:"ナカバ",a:"半ば"},
+{r:"第5・6回",no:17,s:"二つにワカレル。",k:"ワカレル",a:"分かれる"},
+{r:"第5・6回",no:18,s:"アカリがともる。",k:"アカリ",a:"明かり"},
+{r:"第5・6回",no:19,s:"東の空がアカルム。",k:"アカルム",a:"明るむ"},
+{r:"第5・6回",no:20,s:"アタタカイスープ。",k:"アタタカイ",a:"温かい"},
+{r:"第5・6回",no:21,s:"寝ている父をオコス。",k:"オコス",a:"起こす"},
+{r:"第5・6回",no:22,s:"サイワイにも助かる。",k:"サイワイ",a:"幸い"},
+{r:"第5・6回",no:23,s:"シアワセになろう。",k:"シアワセ",a:"幸せ"},
+{r:"第5・6回",no:24,s:"宝石をアキナウ。",k:"アキナウ",a:"商う"},
+{r:"第5・6回",no:25,s:"マッタク知らない。",k:"マッタク",a:"全く"},
+{r:"第5・6回",no:26,s:"スミヤカナ対応だ。",k:"スミヤカナ",a:"速やかな"},
+{r:"第5・6回",no:27,s:"ミジカイ一生だった。",k:"ミジカイ",a:"短い"},
+{r:"第5・6回",no:28,s:"喜びをアラワス。",k:"アラワス",a:"表す"},
+{r:"第5・6回",no:29,s:"寒さもヤワラグ。",k:"ヤワラグ",a:"和らぐ"},
+{r:"第5・6回",no:30,s:"ナゴヤカナ雰囲気。",k:"ナゴヤカナ",a:"和やかな"},
+{r:"第5・6回",no:31,s:"シルシをつける。",k:"シルシ",a:"印"},
+{r:"第5・6回",no:32,s:"心をアラタメル。",k:"アラタメル",a:"改める"},
+{r:"第5・6回",no:33,s:"小鳥がムレて飛ぶ。",k:"ムレ",a:"群れ"},
+{r:"第5・6回",no:34,s:"鳥がムラガル。",k:"ムラガル",a:"群がる"},
+{r:"第5・6回",no:35,s:"古いタテモノだ。",k:"タテモノ",a:"建物"},
+{r:"第5・6回",no:36,s:"モットモ高い山。",k:"モットモ",a:"最も"},
+{r:"第5・6回",no:37,s:"実験をココロミル。",k:"ココロミル",a:"試みる"},
+{r:"第5・6回",no:38,s:"自信をウシナウ。",k:"ウシナウ",a:"失う"},
+{r:"第5・6回",no:39,s:"我が身をカエリミル。",k:"カエリミル",a:"省みる",alts:["顧みる"]},
+{r:"第5・6回",no:40,s:"黒白をアラソウ。",k:"アラソウ",a:"争う"},
+{r:"第5・6回",no:41,s:"カナラズ実行する。",k:"カナラズ",a:"必ず"},
+{r:"第5・6回",no:42,s:"友とワカレル。",k:"ワカレル",a:"別れる"},
+{r:"第5・6回",no:43,s:"イサマシイ姿。",k:"イサマシイ",a:"勇ましい"},
+{r:"第5・6回",no:44,s:"両親をヤシナウ。",k:"ヤシナウ",a:"養う"},
+{r:"第5・6回",no:45,s:"八百屋をイトナム。",k:"イトナム",a:"営む"},
+{r:"第5・6回",no:46,s:"風がココロヨイ。",k:"ココロヨイ",a:"心地よい"},
+{r:"第5・6回",no:47,s:"日時をタシカメル。",k:"タシカメル",a:"確かめる"},
+{r:"第5・6回",no:48,s:"親にサカラウ。",k:"サカラウ",a:"逆らう"},
+{r:"第5・6回",no:49,s:"新しい会社をオコス。",k:"オコス",a:"起こす"},
+{r:"第5・6回",no:50,s:"イサギヨイ態度。",k:"イサギヨイ",a:"潔い"},
+{r:"第5・6回",no:51,s:"畑をタガヤス。",k:"タガヤス",a:"耕す"},
+{r:"第5・6回",no:52,s:"フタタビ始まる。",k:"フタタビ",a:"再び"},
+{r:"第5・6回",no:53,s:"イキオイがある。",k:"イキオイ",a:"勢い"},
+{r:"第5・6回",no:54,s:"健康をソコナウ。",k:"ソコナウ",a:"損なう"},
+{r:"第5・6回",no:55,s:"誘いをコトワル。",k:"コトワル",a:"断る"},
+{r:"第5・6回",no:56,s:"時をツイヤス。",k:"ツイヤス",a:"費やす"},
+{r:"第5・6回",no:57,s:"恩にムクイル。",k:"ムクイル",a:"報いる"},
+{r:"第5・6回",no:58,s:"アブナイ橋を渡る。",k:"アブナイ",a:"危ない"},
+{r:"第5・6回",no:59,s:"アヤウイ立場だ。",k:"アヤウイ",a:"危うい"},
+{r:"第5・6回",no:60,s:"オゴソカナ儀式。",k:"オゴソカナ",a:"厳かな"},
+];
+
+// ---------------------------------------------------------------
+// アプリロジック
+// ---------------------------------------------------------------
+let quizSet = [];
+let idx = 0;
+let correctCount = 0;
+let wrongList = []; // {q, given}
+let answered = false;
+
+const startScreen = document.getElementById('startScreen');
+const quizScreen = document.getElementById('quizScreen');
+const resultScreen = document.getElementById('resultScreen');
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  const ranges = Array.from(document.querySelectorAll('.rangeChk:checked')).map(c=>c.value);
+  if(ranges.length===0){
+    alert('出題範囲を1つ以上選んでください。');
+    return;
+  }
+  let pool = QUESTIONS.filter(q => ranges.includes(q.r));
+  if(document.getElementById('shuffleChk').checked){
+    pool = shuffle(pool);
+  }
+  const countVal = document.getElementById('countSelect').value;
+  if(countVal !== 'all'){
+    pool = pool.slice(0, parseInt(countVal,10));
+  }
+  quizSet = pool;
+  idx = 0;
+  correctCount = 0;
+  wrongList = [];
+  startScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  renderQuestion();
+});
+
+function renderQuestion(){
+  answered = false;
+  const q = quizSet[idx];
+  document.getElementById('qBadge').textContent = q.r + '　問' + q.no;
+  document.getElementById('qCounter').textContent = (idx+1) + ' / ' + quizSet.length;
+  document.getElementById('qScore').textContent = '正解 ' + correctCount;
+  document.getElementById('progressFill').style.width = Math.round((idx/quizSet.length)*100) + '%';
+
+  const highlighted = q.s.replace(q.k, '<span class="blank">' + q.k + '</span>');
+  document.getElementById('qSentence').innerHTML = highlighted;
+
+  const input = document.getElementById('answerInput');
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+
+  const rb = document.getElementById('resultBox');
+  rb.className = 'result-box';
+  rb.textContent = '';
+
+  document.getElementById('submitBtn').textContent = '答える';
+}
+
+function normalize(str){
+  return str.trim()
+    .replace(/[ 　]/g,'')
+    .normalize('NFKC');
+}
+
+function checkAnswer(){
+  if(answered) { nextQuestion(); return; }
+  const q = quizSet[idx];
+  const input = document.getElementById('answerInput');
+  const given = input.value;
+  const norm = normalize(given);
+  const accepted = [q.a].concat(q.alts||[]).map(normalize);
+  const isCorrect = accepted.includes(norm) && norm.length>0;
+
+  answered = true;
+  input.disabled = true;
+
+  const rb = document.getElementById('resultBox');
+  if(isCorrect){
+    correctCount++;
+    rb.className = 'result-box correct';
+    rb.textContent = '○ 正解！「' + q.a + '」';
+  } else {
+    wrongList.push({q:q, given: given || '（未回答）'});
+    rb.className = 'result-box wrong';
+    rb.textContent = '× 不正解。正解は「' + q.a + '」';
+  }
+  document.getElementById('qScore').textContent = '正解 ' + correctCount;
+  document.getElementById('submitBtn').textContent = (idx+1 < quizSet.length) ? '次の問題へ' : '結果を見る';
+}
+
+function skipQuestion(){
+  if(answered){ nextQuestion(); return; }
+  const q = quizSet[idx];
+  wrongList.push({q:q, given:'（スキップ）'});
+  answered = true;
+  document.getElementById('answerInput').disabled = true;
+  const rb = document.getElementById('resultBox');
+  rb.className = 'result-box wrong';
+  rb.textContent = '正解は「' + q.a + '」';
+  document.getElementById('submitBtn').textContent = (idx+1 < quizSet.length) ? '次の問題へ' : '結果を見る';
+}
+
+function nextQuestion(){
+  idx++;
+  if(idx >= quizSet.length){
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+document.getElementById('submitBtn').addEventListener('click', checkAnswer);
+document.getElementById('skipBtn').addEventListener('click', skipQuestion);
+document.getElementById('answerInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    checkAnswer();
+  }
+});
+
+function showResult(){
+  quizScreen.classList.add('hidden');
+  resultScreen.classList.remove('hidden');
+  document.getElementById('finalScore').textContent = correctCount + ' / ' + quizSet.length;
+  const pct = quizSet.length ? Math.round(correctCount/quizSet.length*100) : 0;
+  document.getElementById('finalPct').textContent = '正答率 ' + pct + '%';
+
+  const list = document.getElementById('reviewList');
+  if(wrongList.length===0){
+    list.innerHTML = '<p style="text-align:center;color:var(--correct);font-weight:700;">全問正解です！お見事。</p>';
+  } else {
+    list.innerHTML = '<p class="section-title">間違えた問題（' + wrongList.length + '問）</p>' +
+      wrongList.map(w => {
+        const sentence = w.q.s.replace(w.q.k, '<span class="blank">'+w.q.k+'</span>');
+        return '<div class="review-item">' +
+          '<div class="rs">' + w.q.r + ' 問' + w.q.no + '　' + sentence + '</div>' +
+          '<div><span class="ru">' + (w.given || '未回答') + '</span><span class="ra">→ ' + w.q.a + '</span></div>' +
+          '</div>';
+      }).join('');
+  }
+}
+
+document.getElementById('restartBtn').addEventListener('click', () => {
+  resultScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+});
+
+document.getElementById('retryWrongBtn').addEventListener('click', () => {
+  if(wrongList.length===0){
+    alert('間違えた問題はありません。');
+    return;
+  }
+  quizSet = wrongList.map(w=>w.q);
+  idx = 0;
+  correctCount = 0;
+  wrongList = [];
+  resultScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  renderQuestion();
+});
+</script>
+</body>
+</html>
