@@ -178,27 +178,15 @@
     color:var(--muted);
     margin:-14px 0 18px;
   }
-  .hint-toggle{
-    display:inline-block;
-    font-size:.8rem;
-    color:var(--accent2);
-    background:none;
-    border:1px dashed var(--accent2);
-    border-radius:99px;
-    padding:5px 14px;
-    margin:2px 0 16px;
-    cursor:pointer;
-  }
   .hint-box{
-    display:none;
+    display:block;
     font-size:.85rem;
     color:var(--accent2);
     background:#eef5f1;
     border-radius:8px;
     padding:10px 12px;
-    margin:-8px 0 16px;
+    margin:-10px 0 16px;
   }
-  .hint-box.show{display:block;}
   .meaning-line{
     font-size:.85rem;
     color:var(--muted);
@@ -310,7 +298,6 @@
       <span id="qScore">正解 0</span>
     </div>
     <div class="sentence" id="qSentence"></div>
-    <button type="button" class="hint-toggle" id="hintToggle">意味のヒントを見る</button>
     <div class="hint-box" id="hintBox"></div>
     <input type="text" id="answerInput" placeholder="漢字で入力" autocomplete="off">
     <div class="result-box" id="resultBox"></div>
@@ -547,10 +534,7 @@ function renderQuestion(){
   const highlighted = q.s.replace(q.k, '<span class="blank">' + q.k + '</span>');
   document.getElementById('qSentence').innerHTML = highlighted;
 
-  const hintBox = document.getElementById('hintBox');
-  hintBox.textContent = '意味：' + (q.m || '');
-  hintBox.classList.remove('show');
-  document.getElementById('hintToggle').textContent = '意味のヒントを見る';
+  document.getElementById('hintBox').textContent = '意味：' + (q.m || '');
 
   const input = document.getElementById('answerInput');
   input.value = '';
@@ -563,13 +547,6 @@ function renderQuestion(){
 
   document.getElementById('submitBtn').textContent = '答える';
 }
-
-document.getElementById('hintToggle').addEventListener('click', () => {
-  const hintBox = document.getElementById('hintBox');
-  const btn = document.getElementById('hintToggle');
-  const showing = hintBox.classList.toggle('show');
-  btn.textContent = showing ? '意味のヒントを隠す' : '意味のヒントを見る';
-});
 
 function normalize(str){
   return str.trim()
